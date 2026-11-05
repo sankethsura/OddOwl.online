@@ -27,7 +27,7 @@ export const Orders: CollectionConfig = {
       async ({ data, originalDoc, operation, req }) => {
         if (operation !== 'update' || !originalDoc || !data.status) return data
 
-        const items = originalDoc.items as { product: number | { id: number }; quantity: number }[]
+        const items = originalDoc.items as { product: string | { id: string }; quantity: number }[]
         const lines = items.map((item) => ({
           id: typeof item.product === 'object' ? item.product.id : item.product,
           quantity: item.quantity,

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import React, { useRef, useState } from 'react'
 
 export type PriceRow = {
-  id: number
+  id: string
   slug: string
   name: string
   kind: string

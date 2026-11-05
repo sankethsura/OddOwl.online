@@ -26,7 +26,7 @@ const Price = ({ product }: { product: Product }) => (
 const STRIPS = 4
 
 const unique = (images: (Media | null)[]) => {
-  const seen = new Set<number>()
+  const seen = new Set<string>()
   return images.filter((image): image is Media => {
     if (!image || seen.has(image.id)) return false
     seen.add(image.id)

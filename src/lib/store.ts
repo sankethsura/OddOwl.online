@@ -40,7 +40,7 @@ export const getPolicies = cache(async () => {
   return docs
 })
 
-export const media = (value: number | Media | null | undefined) =>
+export const media = (value: string | Media | null | undefined) =>
   value && typeof value === 'object' && value.url ? value : null
 
 export const rupees = (value: number) => `₹${value.toLocaleString('en-IN')}`

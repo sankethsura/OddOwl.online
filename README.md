@@ -6,7 +6,7 @@ The shop for OddOwl's 3D-printed objects. Next.js and Tailwind on the front, Pay
 
 ```bash
 npm install
-cp .env.example .env     # then set PAYLOAD_SECRET with: openssl rand -hex 32
+cp .env.example .env     # then set DATABASE_URL, and PAYLOAD_SECRET with: openssl rand -hex 32
 npm run seed             # first time only: adds the starter products
 npm run dev -- --port 3000
 ```
@@ -50,15 +50,14 @@ Refunds are issued from the Razorpay dashboard. Then cancel the order here to re
 
 ## Deploying
 
-The database is a SQLite file and uploads are stored in `media/`, so the host needs a persistent disk, such as a small VPS. Serverless hosts like Vercel lose both between requests. Moving there means switching to Postgres or Turso, and to cloud storage for uploads.
+The database is MongoDB. Use a replica set, which every MongoDB Atlas cluster is, because stock reservations need transactions. The shop always uses a database named `oddowl`, whatever name the address carries, and the database user needs read and write access to it. The host must also be allowed through Atlas's Network Access list.
+
+Uploads are stored in `media/`, so the host needs a persistent disk, such as a small VPS. Serverless hosts like Vercel lose them between requests, so moving there means switching uploads to cloud storage.
 
 ```bash
-npm run migrate   # creates the database tables
 npm run seed      # optional, first time only
 npm run build
 npm start
 ```
 
-Set `NEXT_PUBLIC_SITE_URL` to the real address. Back up `oddowl.db` and `media/`, because they hold every order and photo.
-
-When you change a collection's fields, run `npx payload migrate:create` and commit the result. Local development updates its own tables automatically, but production only changes through migrations.
+Set `NEXT_PUBLIC_SITE_URL` to the real address. Back up the `oddowl` database and `media/`, because they hold every order and photo.

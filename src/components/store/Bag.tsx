@@ -5,7 +5,7 @@ import Link from 'next/link'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 export type BagLine = {
-  id: number
+  id: string
   slug: string
   name: string
   price: number
@@ -19,7 +19,7 @@ type BagValue = {
   count: number
   subtotal: number
   add: (line: Omit<BagLine, 'quantity'>) => void
-  setQuantity: (id: number, quantity: number) => void
+  setQuantity: (id: string, quantity: number) => void
   replace: (lines: BagLine[]) => void
   open: () => void
 }

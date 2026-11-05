@@ -92,7 +92,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {
@@ -134,7 +134,7 @@ export interface UserAuthOperations {
  * via the `definition` "products".
  */
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   /**
    * One short sentence shown beside the name.
@@ -166,27 +166,27 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
-  photoDay: number | Media;
-  photoNight: number | Media;
+  photoDay: string | Media;
+  photoNight: string | Media;
   /**
    * Optional. Transparent background, used on the shelf.
    */
-  cutoutDay?: (number | null) | Media;
+  cutoutDay?: (string | null) | Media;
   /**
    * Optional. Falls back to the day cutout.
    */
-  cutoutNight?: (number | null) | Media;
+  cutoutNight?: (string | null) | Media;
   /**
    * Optional lamp-only pair: the same shot with the light off…
    */
-  switchOff?: (number | null) | Media;
+  switchOff?: (string | null) | Media;
   /**
    * …and on. Adds a press-to-light photo.
    */
-  switchOn?: (number | null) | Media;
+  switchOn?: (string | null) | Media;
   gallery?:
     | {
-        image: number | Media;
+        image: string | Media;
         id?: string | null;
       }[]
     | null;
@@ -206,7 +206,7 @@ export interface Product {
    */
   slug: string;
   sku?: string | null;
-  category?: (number | null) | Category;
+  category?: (string | null) | Category;
   /**
    * Lower numbers show first.
    */
@@ -219,7 +219,7 @@ export interface Product {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   /**
    * Describe the photo for people who cannot see it, e.g. "Drift Lamp glowing on a bedside table".
    */
@@ -241,7 +241,7 @@ export interface Media {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -251,10 +251,10 @@ export interface Category {
  * via the `definition` "orders".
  */
 export interface Order {
-  id: number;
+  id: string;
   number: string;
   items: {
-    product: number | Product;
+    product: string | Product;
     name: string;
     unitPrice: number;
     quantity: number;
@@ -302,7 +302,7 @@ export interface Order {
  * via the `definition` "policies".
  */
 export interface Policy {
-  id: number;
+  id: string;
   title: string;
   /**
    * Leave a blank line between paragraphs.
@@ -318,7 +318,7 @@ export interface Policy {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -344,7 +344,7 @@ export interface User {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -361,36 +361,36 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'products';
-        value: number | Product;
+        value: string | Product;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'orders';
-        value: number | Order;
+        value: string | Order;
       } | null)
     | ({
         relationTo: 'policies';
-        value: number | Policy;
+        value: string | Policy;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -400,10 +400,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -423,7 +423,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -626,7 +626,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "store-settings".
  */
 export interface StoreSetting {
-  id: number;
+  id: string;
   /**
    * Flat shipping per order, in rupees.
    */

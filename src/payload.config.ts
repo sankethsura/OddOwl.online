@@ -1,4 +1,4 @@
-import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -40,11 +40,11 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: sqliteAdapter({
-    client: {
-      url: process.env.DATABASE_URL || 'file:./oddowl.db',
-      authToken: process.env.DATABASE_AUTH_TOKEN,
-    },
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URL || '',
+    // Always its own database, whatever name the address carries, so the shop
+    // can never write into another project that shares the cluster.
+    connectOptions: { dbName: 'oddowl' },
   }),
   sharp,
 })

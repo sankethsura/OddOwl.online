@@ -13,11 +13,11 @@ import {
 import { createRazorpayOrder, razorpayConfigured, verifyPaymentSignature } from '@/lib/razorpay'
 import { payloadClient } from '@/lib/store'
 
-type CartInput = { id: number; quantity: number }[]
+type CartInput = { id: string; quantity: number }[]
 
 const loadLines = async (cart: CartInput) => {
   const payload = await payloadClient()
-  const ids = cart.map((line) => Number(line.id)).filter(Number.isInteger)
+  const ids = cart.map((line) => String(line.id)).filter((id) => /^[0-9a-f]{24}$/.test(id))
   const { docs } = await payload.find({
     collection: 'products',
     where: { and: [{ id: { in: ids } }, { status: { equals: 'published' } }] },
@@ -28,7 +28,7 @@ const loadLines = async (cart: CartInput) => {
 }
 
 export type Quote = {
-  lines: { id: number; name: string; price: number; stock: number; quantity: number; requested: number }[]
+  lines: { id: string; name: string; price: number; stock: number; quantity: number; requested: number }[]
   subtotal: number
   shipping: number
   total: number

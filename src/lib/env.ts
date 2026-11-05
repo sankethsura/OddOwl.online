@@ -13,17 +13,11 @@ export const missingRequiredEnv = (): MissingEnv[] => {
     })
   }
 
-  // Locally the database falls back to a file, but a Vercel server does not keep files.
-  const database = process.env.DATABASE_URL?.trim() ?? ''
-  if (process.env.VERCEL && (!database || database.startsWith('file:'))) {
+  if (!/^mongodb(\+srv)?:\/\//.test(process.env.DATABASE_URL?.trim() ?? '')) {
     missing.push({
       name: 'DATABASE_URL',
-      why: 'Vercel cannot keep a database file. Use a hosted database address, such as libsql://… from Turso.',
+      why: 'Must be a MongoDB address starting with mongodb+srv:// or mongodb://.',
     })
-  }
-
-  if (database.startsWith('libsql:') && !database.includes('authToken=') && !isSet('DATABASE_AUTH_TOKEN')) {
-    missing.push({ name: 'DATABASE_AUTH_TOKEN', why: 'The access token for the hosted database.' })
   }
 
   return missing

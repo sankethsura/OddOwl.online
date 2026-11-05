@@ -11,6 +11,9 @@ const images = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../se
 
 const payload = await getPayload({ config })
 
+// On an empty database, a write made while the indexes are still building can fail.
+await Promise.all(Object.values(payload.db.collections).map((model) => model.init()))
+
 const existing = await payload.count({ collection: 'products' })
 if (existing.totalDocs > 0) {
   payload.logger.info('Products already exist, nothing to seed.')
