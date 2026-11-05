@@ -2,9 +2,13 @@ export type MissingEnv = { name: string; why: string }
 
 const isSet = (name: string) => Boolean(process.env[name]?.trim())
 
+/** Until this is on, the site shows the built-in catalogue and never touches a database. */
+export const databaseEnabled = () => process.env.DATABASE_ENABLED === 'true'
+
 /** Settings the site cannot run without. Only names and reasons are ever shown, never values. */
 export const missingRequiredEnv = (): MissingEnv[] => {
   const missing: MissingEnv[] = []
+  if (!databaseEnabled()) return missing
 
   if (!isSet('PAYLOAD_SECRET')) {
     missing.push({

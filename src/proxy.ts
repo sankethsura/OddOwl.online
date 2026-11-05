@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
-import { envFixHint, missingRequiredEnv, type MissingEnv } from './lib/env'
+import { databaseEnabled, envFixHint, missingRequiredEnv, type MissingEnv } from './lib/env'
 
-const setupPage = (missing: MissingEnv[]) => `<!doctype html>
+const setupPage = (heading: string, intro: string, missing: MissingEnv[]) => `<!doctype html>
 <html lang="en-IN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Setup needed · OddOwl</title>
+<title>${heading} · OddOwl</title>
 <style>
   :root { color-scheme: dark; }
   body { background: oklch(0.13 0 0); color: oklch(0.96 0 0); font: 1.0625rem/1.5 system-ui, sans-serif; margin: 0; padding: clamp(2rem, 8vw, 6rem) 1rem; }
@@ -23,8 +23,8 @@ const setupPage = (missing: MissingEnv[]) => `<!doctype html>
 </head>
 <body>
 <main>
-  <h1>Setup needed</h1>
-  <p>The site cannot start until ${missing.length === 1 ? 'this setting is' : 'these settings are'} added.</p>
+  <h1>${heading}</h1>
+  <p>${intro}</p>
   <ul>
     ${missing.map(({ name, why }) => `<li><code>${name}</code><p>${why}</p></li>`).join('\n    ')}
   </ul>
@@ -33,15 +33,35 @@ const setupPage = (missing: MissingEnv[]) => `<!doctype html>
 </body>
 </html>`
 
-// Runs before any page, the CMS or the API, all of which would crash without these settings.
-export function proxy() {
-  const missing = missingRequiredEnv()
-  if (missing.length === 0) return NextResponse.next()
-
-  return new NextResponse(setupPage(missing), {
+const unavailable = (html: string) =>
+  new NextResponse(html, {
     status: 503,
     headers: { 'Cache-Control': 'no-store', 'Content-Type': 'text/html; charset=utf-8' },
   })
+
+// Runs before any page, the CMS or the API, all of which would crash without these settings.
+export function proxy(request: NextRequest) {
+  if (!databaseEnabled()) {
+    const { pathname } = request.nextUrl
+    if (!pathname.startsWith('/admin') && !pathname.startsWith('/api')) return NextResponse.next()
+
+    return unavailable(
+      setupPage('CMS is off', 'The shop is showing its built-in catalogue. The CMS and ordering need the database.', [
+        { name: 'DATABASE_ENABLED', why: 'Set this to true once the database is connected.' },
+      ]),
+    )
+  }
+
+  const missing = missingRequiredEnv()
+  if (missing.length === 0) return NextResponse.next()
+
+  return unavailable(
+    setupPage(
+      'Setup needed',
+      `The site cannot start until ${missing.length === 1 ? 'this setting is' : 'these settings are'} added.`,
+      missing,
+    ),
+  )
 }
 
 export const config = {

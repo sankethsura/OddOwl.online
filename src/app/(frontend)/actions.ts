@@ -1,5 +1,6 @@
 'use server'
 
+import { databaseEnabled } from '@/lib/env'
 import {
   CHECKOUT_WINDOW_SECONDS,
   MAX_PER_LINE,
@@ -105,6 +106,8 @@ const validate = (form: CheckoutForm): { error: string; field: keyof CheckoutFor
 export const startCheckout = async (cart: CartInput, form: CheckoutForm): Promise<CheckoutResult> => {
   // A field that is hidden from people and only bots fill in.
   if (form.website) return { ok: false, error: 'Something went wrong. Please try again.' }
+
+  if (!databaseEnabled()) return { ok: false, error: 'Orders open soon. Nothing has been charged.' }
 
   const invalid = validate(form)
   if (invalid) return { ok: false, ...invalid }

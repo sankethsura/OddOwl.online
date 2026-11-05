@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { Eyes } from '@/components/store/Eyes'
+import { databaseEnabled } from '@/lib/env'
 import { payloadClient, rupees } from '@/lib/store'
 import type { Order } from '@/payload-types'
 
@@ -25,6 +26,7 @@ const HEADLINES: Record<Order['status'], { title: string; note: string }> = {
 }
 
 export default async function OrderPage({ params }: { params: Promise<{ number: string }> }) {
+  if (!databaseEnabled()) notFound()
   const { number } = await params
   const payload = await payloadClient()
   const { docs } = await payload.find({

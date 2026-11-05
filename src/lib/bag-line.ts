@@ -1,9 +1,11 @@
 import type { BagLine } from '@/components/store/Bag'
 import type { Product } from '@/payload-types'
 
+import { databaseEnabled } from './env'
 import { media } from './store'
 
-export const toBagProduct = (product: Product): Omit<BagLine, 'quantity'> => ({
+export const toBagProduct = (product: Product) => ({
+  orderable: databaseEnabled(),
   id: product.id,
   slug: product.slug,
   name: product.name,

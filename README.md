@@ -14,6 +14,8 @@ npm run dev -- --port 3000
 - Shop: http://localhost:3000
 - CMS: http://localhost:3000/admin (the first visit asks you to create your login)
 
+Without `DATABASE_ENABLED=true`, the site runs with no database: it shows the built-in catalogue in `src/lib/catalog.ts`, buying is switched off, and `/admin` explains how to turn it on.
+
 ## Running the shop from the CMS
 
 | To do this | Go to |

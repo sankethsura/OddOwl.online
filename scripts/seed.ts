@@ -7,7 +7,7 @@ import { getPayload } from 'payload'
 
 import config from '../src/payload.config'
 
-const images = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../seed/images')
+const images = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public/catalog')
 
 const payload = await getPayload({ config })
 

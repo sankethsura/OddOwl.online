@@ -486,6 +486,11 @@ h3 {
   color: var(--stage-on-accent);
 }
 
+.descent-end button:disabled {
+  color: var(--stage-muted);
+  outline-color: var(--stage-muted);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .descent {
     height: auto;

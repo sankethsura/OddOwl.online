@@ -187,20 +187,21 @@ export const AddToBag = ({
   product,
   className = '',
 }: {
-  product: Omit<BagLine, 'quantity'>
+  product: Omit<BagLine, 'quantity'> & { orderable: boolean }
   className?: string
 }) => {
   const { add } = useBag()
-  const soldOut = product.stock === 0
+  const { orderable, ...line } = product
+  const soldOut = line.stock === 0
 
   return (
     <button
       type="button"
-      disabled={soldOut}
-      onClick={() => add(product)}
+      disabled={!orderable || soldOut}
+      onClick={() => add(line)}
       className={`t-tight cursor-pointer bg-accent px-8 py-4 text-lg font-semibold text-on-accent transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted disabled:outline disabled:outline-1 disabled:outline-line ${className}`}
     >
-      {soldOut ? 'Sold out' : 'Add to bag'}
+      {!orderable ? 'Orders open soon' : soldOut ? 'Sold out' : 'Add to bag'}
     </button>
   )
 }
