@@ -1,6 +1,7 @@
 import type { ServerComponentProps } from 'payload'
 import React from 'react'
 
+import { envFixHint, missingPaymentEnv, missingRecommendedEnv } from '../../lib/env'
 import { releaseExpiredReservations } from '../../lib/orders'
 
 const rupees = (value: number) => `₹${value.toLocaleString('en-IN')}`
@@ -28,9 +29,24 @@ export const StockBoard = async ({ payload }: ServerComponentProps) => {
   const units = published.reduce((sum, product) => sum + product.stock, 0)
   const value = published.reduce((sum, product) => sum + product.stock * product.price, 0)
   const low = published.filter((product) => product.stock <= (settings.lowStockAt ?? 3))
+  const missingEnv = [...missingPaymentEnv(), ...missingRecommendedEnv()]
 
   return (
     <section style={{ marginBottom: 'calc(var(--base) * 2)' }}>
+      {missingEnv.length > 0 && (
+        <div style={{ ...cell, borderColor: 'var(--theme-error-500)', marginBottom: 'var(--base)' }}>
+          <p style={{ fontWeight: 600, margin: '0 0 calc(var(--base) / 2)' }}>Settings still missing</p>
+          <ul style={{ listStyle: 'none', margin: '0 0 calc(var(--base) / 2)', padding: 0 }}>
+            {missingEnv.map(({ name, why }) => (
+              <li key={name}>
+                <code>{name}</code>: {why}
+              </li>
+            ))}
+          </ul>
+          <p style={label}>{envFixHint()}</p>
+        </div>
+      )}
+
       <h2 style={{ marginBottom: 'var(--base)' }}>Shelf</h2>
 
       <div
