@@ -1,0 +1,594 @@
+@import 'tailwindcss';
+
+/* Night is black and marigold, so the lit photos glow. Day is white and dark pine,
+   so the switch is dramatic and the photos keep their true colours. */
+:root,
+[data-mode='night'] {
+  color-scheme: dark;
+  --bg: oklch(0.13 0 0);
+  --surface: oklch(0.19 0 0);
+  --ink: oklch(0.96 0 0);
+  --muted: oklch(0.76 0 0);
+  --line: oklch(0.96 0 0 / 0.22);
+  --accent: oklch(0.8 0.16 78);
+  --on-accent: oklch(0.13 0 0);
+  --wordmark: oklch(0.8 0.16 78);
+  --error: oklch(0.78 0.14 30);
+}
+
+[data-mode='day'] {
+  color-scheme: light;
+  --bg: oklch(1 0 0);
+  --surface: oklch(0.96 0.012 170);
+  --ink: oklch(0.24 0.05 170);
+  --muted: oklch(0.4 0.05 170);
+  --line: oklch(0.24 0.05 170 / 0.25);
+  --accent: oklch(0.36 0.08 170);
+  --on-accent: oklch(1 0 0);
+  --wordmark: oklch(0.36 0.08 170);
+  --error: oklch(0.45 0.17 25);
+}
+
+/* The descent stage and the switch button stay dark in both modes. */
+:root {
+  --stage: oklch(0.1 0 0);
+  --stage-ink: oklch(0.96 0 0);
+  --stage-muted: oklch(0.76 0 0);
+  --stage-accent: oklch(0.8 0.16 78);
+  --stage-on-accent: oklch(0.13 0 0);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-error: var(--error);
+  --font-display: var(--font-anybody);
+  --font-prose: var(--font-spectral);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --z-sticky: 20;
+  --z-cord: 30;
+  --z-modal: 40;
+}
+
+html {
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-anybody);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Type voices: one family stretched to two extremes ---------- */
+
+.t-wide {
+  font-family: var(--font-anybody);
+  font-stretch: 150%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+}
+
+.t-tight {
+  font-family: var(--font-anybody);
+  font-stretch: 75%;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+}
+
+.t-prose {
+  font-family: var(--font-spectral);
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.t-prose p + p {
+  margin-top: 1em;
+}
+
+/* ---------- Mode-dependent content, resolved with no JavaScript ---------- */
+
+[data-mode='day'] .only-night,
+[data-mode='night'] .only-day {
+  display: none;
+}
+
+/* ---------- The switch: light spreads out from the cord ---------- */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+.cord-pull {
+  transition: transform 700ms var(--ease-out-expo);
+}
+
+.cord-pull[data-pulled='true'] {
+  transform: translateY(18px);
+  transition-duration: 90ms;
+}
+
+/* ---------- Owl eyes: asleep by day ---------- */
+
+.eye-pupil {
+  transform: translate(var(--eye-x, 0px), var(--eye-y, 0px));
+}
+
+[data-mode='day'] .eye-open,
+[data-mode='night'] .eye-shut {
+  display: none;
+}
+
+/* Each eye closes around its own centre, and the small one is a beat behind. */
+.eye-lid {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+[data-mode='night'][data-blink] .eye-lid {
+  animation: eye-blink 180ms ease-in-out both;
+}
+
+/* By day the owl is asleep, so its blink is a quick peek instead. */
+[data-mode='day'][data-blink] .eye-open {
+  display: inline;
+}
+
+[data-mode='day'][data-blink] .eye-shut {
+  display: none;
+}
+
+[data-mode='day'][data-blink] .eye-lid {
+  animation: eye-peek 650ms ease-in-out both;
+}
+
+[data-mode][data-blink] .eye-lid:last-child {
+  animation-delay: 40ms;
+}
+
+@keyframes eye-blink {
+  50% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes eye-peek {
+  0%,
+  100% {
+    transform: scaleY(0.08);
+  }
+  25%,
+  75% {
+    transform: scaleY(1);
+  }
+}
+
+/* ---------- Hero: the photos cut into diagonal strips ---------- */
+
+/* Each strip is skewed and its photo skewed back, so the cut is on the slant but
+   the photo stays upright. The row overhangs the page to fill the slanted corners. */
+.strips {
+  --slant: -9deg;
+  display: flex;
+  gap: 0.5rem;
+  inset: 0 -10svh;
+  mask-image: linear-gradient(to bottom, transparent 0, black 15%, black 58%, transparent 84%);
+  position: absolute;
+}
+
+.strip {
+  animation-delay: calc(var(--i) * 130ms);
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  transform: skewX(var(--slant));
+  transition: flex-grow 900ms var(--ease-out-expo);
+}
+
+.strip-photo {
+  inset: 0;
+  position: absolute;
+  transform: skewX(calc(var(--slant) * -1));
+}
+
+.strip-photo img {
+  height: 100%;
+  left: 50%;
+  max-width: none;
+  min-width: 150%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  transition: transform 1200ms var(--ease-out-expo);
+  width: auto;
+}
+
+/* The row overhangs the page, so the outer photos are nudged back into view. */
+.strip:first-child img {
+  left: calc(50% + 7svh);
+}
+
+.strip:last-child img {
+  left: calc(50% - 7svh);
+}
+
+.strip-label {
+  background: var(--bg);
+  bottom: 44%;
+  left: 50%;
+  opacity: 0;
+  padding: 0.5rem 0.875rem;
+  position: absolute;
+  transform: translateX(-50%) skewX(calc(var(--slant) * -1));
+  transition: opacity 400ms var(--ease-out-expo);
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .strip:hover {
+    flex-grow: 1.7;
+  }
+
+  .strip:hover img {
+    transform: translateX(-50%) scale(1.04);
+  }
+
+  .strip:hover .strip-label {
+    opacity: 1;
+  }
+}
+
+.strip:focus-visible {
+  flex-grow: 1.7;
+  outline-offset: -6px;
+}
+
+.strip:focus-visible .strip-label {
+  opacity: 1;
+}
+
+/* ---------- Wordmark ---------- */
+
+.wordmark {
+  color: var(--wordmark);
+  display: flex;
+  font-size: 13.4vw;
+  font-stretch: 150%;
+  font-weight: 800;
+  justify-content: space-between;
+  letter-spacing: -0.035em;
+  line-height: 0.8;
+  white-space: nowrap;
+}
+
+/* On a portrait screen, tall thin slices would cut every product in half,
+   so the strips stack as bands on the same kind of slant. */
+@media (orientation: portrait) {
+  .strips {
+    --slant: -6deg;
+    flex-direction: column;
+    inset: 3.5rem 0 calc(13.4vw * 0.8 + 6rem);
+    mask-image: linear-gradient(to bottom, transparent 0, black 3%, black 95%, transparent 100%);
+  }
+
+  .strip {
+    transform: skewY(var(--slant));
+  }
+
+  .strip:nth-child(n + 3) {
+    display: none;
+  }
+
+  .strip-photo {
+    transform: skewY(calc(var(--slant) * -1));
+  }
+
+  .strip-photo img,
+  .strip:first-child img,
+  .strip:last-child img {
+    height: auto;
+    left: 50%;
+    min-width: 0;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 104%;
+  }
+
+  .strip:hover img {
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+
+  .strip-label {
+    display: none;
+  }
+}
+
+/* On the narrowest phones the tagline wraps to two lines, so the photos end a line higher. */
+@media (orientation: portrait) and (max-width: 359px) {
+  .strips {
+    bottom: calc(13.4vw * 0.8 + 8rem);
+  }
+}
+
+/* Two bands keep each piece whole. Only a screen at least twice as tall as it is wide has room for a third. */
+@media (orientation: portrait) and (max-aspect-ratio: 1/2) {
+  .strip:nth-child(3) {
+    display: block;
+  }
+}
+
+/* ---------- Printing: the object rises in visible layers ---------- */
+
+@keyframes print-up {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.print-up {
+  animation: print-up 1500ms steps(46) both;
+}
+
+/* The fine horizontal lines every printed object carries, used as a divider. */
+.layer-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--line) 0 1px,
+    transparent 1px 5px
+  );
+}
+
+/* ---------- The descent: always dark, whatever the mode ---------- */
+
+.descent {
+  --shift: 15vw;
+  background: var(--stage);
+  color: var(--stage-ink);
+  height: 340svh;
+}
+
+.descent-stage {
+  --progress: 0;
+  height: 100svh;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+}
+
+/* The camera moves toward the staircase, so the origin sits on the open side of the head. */
+.descent-image {
+  inset: 0;
+  position: absolute;
+  transform: translateX(var(--shift)) scale(calc(1 + var(--progress) * 1.15));
+  transform-origin: 38% 46%;
+  will-change: transform;
+}
+
+.descent-image img {
+  height: 92%;
+  margin: 4% auto 0;
+  object-fit: contain;
+  width: auto;
+}
+
+.descent-captions {
+  inset: 0;
+  position: absolute;
+}
+
+/* Each caption owns one slice of the first 80% of the track. */
+.descent-caption {
+  --span: calc(0.8 / var(--count));
+  --start: calc(var(--from) * 0.8);
+  --local: calc((var(--progress) - var(--start)) / var(--span));
+  bottom: clamp(1.5rem, 6vh, 4rem);
+  font-size: clamp(1.5rem, 2.9vw, 2.75rem);
+  left: clamp(1rem, 2vw, 1.5rem);
+  line-height: 1.08;
+  max-width: 34vw;
+  opacity: clamp(0, min(var(--local) * 6, (1 - var(--local)) * 6), 1);
+  position: absolute;
+  text-shadow: 0 0 1.2em var(--stage);
+}
+
+.descent-end {
+  bottom: clamp(1.5rem, 6vh, 4rem);
+  left: clamp(1rem, 2vw, 1.5rem);
+  opacity: clamp(0, calc((var(--progress) - 0.84) * 8), 1);
+  max-width: 40vw;
+  pointer-events: none;
+  position: absolute;
+  text-shadow: 0 0 1em var(--stage);
+}
+
+@media (max-width: 767px) {
+  .descent-end {
+    max-width: none;
+    right: 1rem;
+  }
+}
+
+/* On a phone the piece fills the width, so the words sit on a dark fade instead of beside it. */
+@media (max-width: 767px) {
+  .descent {
+    --shift: 0px;
+  }
+
+  .descent-stage::after {
+    background: linear-gradient(to top, var(--stage) 22%, transparent);
+    bottom: 0;
+    content: '';
+    height: 50%;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
+
+  .descent-captions,
+  .descent-end {
+    z-index: 1;
+  }
+
+  .descent-caption {
+    max-width: 88vw;
+  }
+}
+
+/* Links in the last frame can only be reached once they are showing. */
+.descent-end a,
+.descent-end button {
+  pointer-events: auto;
+  visibility: var(--end-visibility, visible);
+}
+
+/* The button keeps its night colours in both modes, because this stage is always night. */
+.descent-end button:not(:disabled) {
+  background: var(--stage-accent);
+  color: var(--stage-on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .descent {
+    height: auto;
+    padding-bottom: 3rem;
+  }
+
+  .descent-stage {
+    height: auto;
+    overflow: visible;
+    position: static;
+  }
+
+  .descent-image {
+    position: static;
+    transform: none;
+  }
+
+  .descent-captions {
+    display: grid;
+    gap: 1.5rem;
+    padding: 2rem 1rem;
+    position: static;
+  }
+
+  .descent-caption,
+  .descent-end {
+    opacity: 1;
+    position: static;
+  }
+
+  .descent-end {
+    padding: 0 1rem;
+  }
+}
+
+/* ---------- Press to light ---------- */
+
+.switch-frame [data-lit] {
+  transition: opacity 900ms var(--ease-out-expo);
+}
+
+.switch-frame[data-on='false'] [data-lit] {
+  opacity: 0;
+}
+
+/* ---------- Bag drawer ---------- */
+
+dialog.drawer {
+  background: var(--surface);
+  color: var(--ink);
+  height: 100dvh;
+  margin: 0 0 0 auto;
+  max-height: none;
+  max-width: min(30rem, 100vw);
+  width: 100%;
+}
+
+dialog.drawer[open] {
+  animation: drawer-in 500ms var(--ease-out-expo);
+}
+
+dialog.drawer::backdrop {
+  background: color-mix(in oklch, var(--stage) 60%, transparent);
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+.field {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--muted);
+  color: var(--ink);
+  font-family: var(--font-spectral);
+  font-size: 1.125rem;
+  padding: 0.5rem 0;
+  width: 100%;
+}
+
+.field:focus-visible {
+  border-bottom-color: var(--accent);
+  box-shadow: 0 1px 0 var(--accent);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .print-up,
+  dialog.drawer[open] {
+    animation: none;
+  }
+
+  .cord-pull,
+  .strip,
+  .strip-photo img,
+  .strip-label,
+  .switch-frame [data-lit] {
+    transition: none;
+  }
+}
